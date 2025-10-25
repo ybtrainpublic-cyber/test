@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>로봇 관리 시스템</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">로봇 관리 시스템</h1>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <form method="get" action="{{ url_for('index') }}" class="d-flex">
+                    <input type="text" name="q" class="form-control me-2" placeholder="로봇 또는 작업 이름으로 검색..." value="{{ search_query or '' }}">
+                    <button type="submit" class="btn btn-outline-secondary">검색</button>
+                </form>
+            </div>
+            <div class="col-md-2">
+                <form method="get" action="{{ url_for('index') }}" id="sort-form">
+                    <input type="hidden" name="q" value="{{ search_query or '' }}">
+                    <select name="sort" class="form-select" onchange="document.getElementById('sort-form').submit();">
+                        <option value="name_asc" {{ 'selected' if sort_by == 'name_asc' }}>이름 오름차순</option>
+                        <option value="name_desc" {{ 'selected' if sort_by == 'name_desc' }}>이름 내림차순</option>
+                    </select>
+                </form>
+            </div>
+            <div class="col-md-2 text-end">
+                <a href="{{ url_for('add_robot') }}" class="btn btn-primary w-100">새 로봇 추가</a>
+            </div>
+        </div>
+
+
+
+        {% for robot in robots %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ robot.robot_name }} <small class="text-muted">({{ robot.model }})</small></h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('edit_robot', robot_id=robot.robot_id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
+                        <form action="{{ url_for('delete_robot', robot_id=robot.robot_id) }}" method="post" onsubmit="return confirm('정말로 이 로봇과 모든 작업을 삭제하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-sm mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">작업명</th>
+                            <th scope="col">상태</th>
+                            <th scope="col" class="text-end">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in robot.tasks %}
+                        <tr>
+                            <td>{{ task.task_name }}</td>
+                            <td>{{ task.status }}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ url_for('edit_task', task_id=task.task_id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
+                                    <form action="{{ url_for('delete_task', task_id=task.task_id) }}" method="post" onsubmit="return confirm('이 작업을 삭제하시겠습니까?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">할당된 작업이 없습니다.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{{ url_for('add_task', robot_id=robot.robot_id) }}" class="btn btn-sm btn-primary">이 로봇에 작업 추가</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center">등록된 로봇이 없습니다.</div>
+        {% endfor %}
+
+        {% if total_pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ 'disabled' if page <= 1 }}">
+                    <a class="page-link" href="{{ url_for('index', page=page-1, q=search_query, sort=sort_by) }}">이전</a>
+                </li>
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {{ 'active' if p == page }}">
+                    <a class="page-link" href="{{ url_for('index', page=p, q=search_query, sort=sort_by) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if page >= total_pages }}">
+                    <a class="page-link" href="{{ url_for('index', page=page+1, q=search_query, sort=sort_by) }}">다음</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    <!-- Bootstrap JS Bundle CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
