@@ -1,7 +1,7 @@
 # 파일 입출력 시 os 모듈을 사용하지 않으므로 주석 처리합니다.
 # import os 
 
-# --- 1. 데이터 모델링: Stock 클래스 정의 (전역) ---
+
 class Stock:
     # 엑셀 헤더 순서: 종목명, 종목코드, 현재가, 전일대비, 등락률
     def __init__(self, name, code, price, change, rate):
