@@ -2,117 +2,72 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>로봇 관리 시스템</title>
-    <!-- Bootstrap CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로봇-작업 관리 웹 애플리케이션</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        code {
+            background-color: #e9e9e9;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #e9e9e9;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0">로봇 관리 시스템</h1>
-        </div>
+    <div class="container">
+        <h1>로봇-작업 관리 웹 애플리케이션</h1>
+        <p>이 프로젝트는 Flask와 Pandas를 사용하여 로봇과 로봇에게 할당된 작업을 관리하는 간단한 웹 애플리케이션입니다. 데이터는 Excel 파일(<code>Robot02.xlsx</code>)에 저장됩니다.</p>
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-info" role="alert">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <form method="get" action="{{ url_for('index') }}" class="d-flex">
-                    <input type="text" name="q" class="form-control me-2" placeholder="로봇 또는 작업 이름으로 검색..." value="{{ search_query or '' }}">
-                    <button type="submit" class="btn btn-outline-secondary">검색</button>
-                </form>
-            </div>
-            <div class="col-md-2">
-                <form method="get" action="{{ url_for('index') }}" id="sort-form">
-                    <input type="hidden" name="q" value="{{ search_query or '' }}">
-                    <select name="sort" class="form-select" onchange="document.getElementById('sort-form').submit();">
-                        <option value="name_asc" {{ 'selected' if sort_by == 'name_asc' }}>이름 오름차순</option>
-                        <option value="name_desc" {{ 'selected' if sort_by == 'name_desc' }}>이름 내림차순</option>
-                    </select>
-                </form>
-            </div>
-            <div class="col-md-2 text-end">
-                <a href="{{ url_for('add_robot') }}" class="btn btn-primary w-100">새 로봇 추가</a>
-            </div>
-        </div>
+        <h2>🚀 주요 기능</h2>
+        <ul>
+            <li><strong>로봇 관리 (CRUD):</strong> 로봇 목록 조회, 추가, 수정, 삭제 (관련 작업 포함)</li>
+            <li><strong>작업 관리 (CRUD):</strong> 각 로봇에 할당된 작업 목록 조회, 추가, 수정, 삭제</li>
+            <li><strong>편의 기능:</strong> 검색 (로봇 이름, 모델, 작업 이름), 정렬 (로봇 이름 오름차순/내림차순), 페이지네이션</li>
+        </ul>
 
+        <h2>🛠️ 기술 스택</h2>
+        <ul>
+            <li><strong>백엔드:</strong> Python, Flask</li>
+            <li><strong>데이터 처리:</strong> Pandas</li>
+            <li><strong>데이터베이스:</strong> Microsoft Excel (<code>.xlsx</code>)</li>
+            <li><strong>프론트엔드:</strong> HTML, CSS (Bootstrap), Jinja2</li>
+        </ul>
 
-
-        {% for robot in robots %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ robot.robot_name }} <small class="text-muted">({{ robot.model }})</small></h5>
-                    <div class="d-flex gap-2">
-                        <a href="{{ url_for('edit_robot', robot_id=robot.robot_id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
-                        <form action="{{ url_for('delete_robot', robot_id=robot.robot_id) }}" method="post" onsubmit="return confirm('정말로 이 로봇과 모든 작업을 삭제하시겠습니까?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <table class="table table-hover table-sm mb-3">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">작업명</th>
-                            <th scope="col">상태</th>
-                            <th scope="col" class="text-end">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in robot.tasks %}
-                        <tr>
-                            <td>{{ task.task_name }}</td>
-                            <td>{{ task.status }}</td>
-                            <td class="text-end">
-                                <div class="d-flex gap-2 justify-content-end">
-                                    <a href="{{ url_for('edit_task', task_id=task.task_id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
-                                    <form action="{{ url_for('delete_task', task_id=task.task_id) }}" method="post" onsubmit="return confirm('이 작업을 삭제하시겠습니까?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="3" class="text-center text-muted">할당된 작업이 없습니다.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <a href="{{ url_for('add_task', robot_id=robot.robot_id) }}" class="btn btn-sm btn-primary">이 로봇에 작업 추가</a>
-            </div>
-        </div>
-        {% else %}
-        <div class="alert alert-secondary text-center">등록된 로봇이 없습니다.</div>
-        {% endfor %}
-
-        {% if total_pages > 1 %}
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <li class="page-item {{ 'disabled' if page <= 1 }}">
-                    <a class="page-link" href="{{ url_for('index', page=page-1, q=search_query, sort=sort_by) }}">이전</a>
-                </li>
-                {% for p in range(1, total_pages + 1) %}
-                <li class="page-item {{ 'active' if p == page }}">
-                    <a class="page-link" href="{{ url_for('index', page=p, q=search_query, sort=sort_by) }}">{{ p }}</a>
-                </li>
-                {% endfor %}
-                <li class="page-item {{ 'disabled' if page >= total_pages }}">
-                    <a class="page-link" href="{{ url_for('index', page=page+1, q=search_query, sort=sort_by) }}">다음</a>
-                </li>
-            </ul>
-        </nav>
-        {% endif %}
+        <h2>⚙️ 설치 및 실행 방법</h2>
+        <p>1. <strong>필요한 라이브러리 설치</strong></p>
+        <pre><code>pip install Flask pandas openpyxl</code></pre>
+        <p>2. <strong>애플리케이션 실행</strong></p>
+        <pre><code>python app.py</code></pre>
+        <p>3. <strong>웹 브라우저에서 접속</strong></p>
+        <p>실행 후 터미널에 나타나는 주소(기본값: <code>http://127.0.0.1:5000</code>)로 접속합니다. 최초 실행 시, 샘플 데이터가 포함된 <code>Robot02.xlsx</code> 파일이 자동으로 생성됩니다.</p>
     </div>
-    <!-- Bootstrap JS Bundle CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
