@@ -26,7 +26,7 @@
 - **백엔드**: Python, Flask
 - **데이터 처리**: Pandas
 - **데이터베이스**: Microsoft Excel (`.xlsx`)
-- **프론트엔드**: HTML (Jinja2 템플릿)
+- **프론트엔드**: HTML, CSS (Bootstrap), Jinja2
 
 ## ⚙️ 설치 및 실행 방법
 
